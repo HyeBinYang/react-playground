@@ -1,38 +1,36 @@
-.App {
-  text-align: center;
+label {
+  display: block;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.chat-box {
+  width: 100%;
+  height: 500px;
+  background-color: rgb(177, 216, 231);
+  margin-bottom: 20px;
+  overflow-y: scroll;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+/* export interface Chat {
+  id?: string;
+  pharmacyId?: string;
+  pharmacy?: Pharmacy;
+  customerId?: string;
+  customer?: any;
+  lastMessage?: Message;
+  lastMessageAt?: Timestamp;
+  pharmacyUnreadCount?: number;
+  customerUnreadCount?: number;
+  messages?: Message[];
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
+export interface Message {
+  id: string;
+  toId: string;
+  fromId: string;
+  type: string;
+  createdAt: Timestamp;
+  // readAt?: Timestamp;
+  text?: string;
+  imageURL?: string;
+  fileURL?: string;
+} */
