@@ -18,6 +18,7 @@ import {
 import { database } from "../firebase";
 import { useEffect } from "react";
 import { useRef } from "react";
+import { useCallback } from "react";
 
 const ChatRoom = ({ room }) => {
   const [message, setMessage] = useState("");
@@ -32,9 +33,10 @@ const ChatRoom = ({ room }) => {
   const handleSendMessage = async () => {
     if (!message) return;
 
-    setMessage("");
     const { id: roomId, pharmacyId, customerId } = room;
     let messageId = null;
+
+    setMessage("");
 
     try {
       // chat 에 message 추가
@@ -48,7 +50,6 @@ const ChatRoom = ({ room }) => {
       messageId = response.id;
 
       const lastMessage = await getDoc(doc(database, `Chat/${roomId}/massages/${messageId}`));
-
       const batch = writeBatch(database);
 
       Promise.all([
@@ -100,16 +101,78 @@ const ChatRoom = ({ room }) => {
     };
   }, [room]);
 
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [items, setItems] = useState(Array.from({ length: 10 }));
+  const [target, setTarget] = useState(null);
+  const prevScrollHeight = useRef(0);
+
+  const getMoreItem = async () => {
+    setIsLoaded(true);
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    const arr = [11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    setItems((items) => [...arr, ...items]);
+    setIsLoaded(false);
+  };
+
+  const onIntersect = async ([entry], observer) => {
+    console.log(entry.isIntersecting, observer);
+    if (entry.isIntersecting && !isLoaded) {
+      console.log("감지!");
+      observer.unobserve(entry.target);
+      await getMoreItem();
+      // boxRef.current.scrollTop = boxRef.current.scrollHeight - prevScrollHeight;
+      observer.observe(entry.target);
+    }
+  };
+
+  useEffect(() => {
+    if (target) {
+      console.log("we");
+      const observer = new IntersectionObserver(onIntersect, {
+        threshold: 0.3,
+        root: boxRef.current,
+        rootMargin: `${boxRef.current.scrollHeight / 2}px 0px 0px 0px`,
+      });
+
+      observer.observe(target);
+    }
+  }, [target]);
+
+  useEffect(() => {
+    boxRef.current.scrollTop = boxRef.current.scrollHeight - prevScrollHeight.current;
+    prevScrollHeight.current = boxRef.current.scrollHeight;
+    console.log(items);
+  }, [items]);
+
   return (
     <>
       <h1>채팅방</h1>
       <div className="chat-box" ref={boxRef}>
-        <p>
+        <p style={{ position: "sticky", top: "0", backgroundColor: "orange", margin: "0", height: "50px" }}>
           To: <b>{room.customerId}</b>
         </p>
+        <div style={{}} ref={setTarget}></div>
         <div>
-          {messages.map((message, index) => (
+          {/* {messages.map((message) => (
             <div style={{ textAlign: message.from === room.pharmacyId ? "right" : "left" }}>
+              <p
+                key={message.id}
+                style={{
+                  padding: "10px",
+                  backgroundColor: "white",
+                  width: "100px",
+                  height: "70px",
+                  display: "inline-block",
+                  marginRight: "15px",
+                  marginLeft: "15px",
+                }}
+              >
+                {message.text}
+              </p>
+            </div>
+          ))} */}
+          {items.map((item, index) => (
+            <div>
               <p
                 key={index}
                 style={{
@@ -122,7 +185,7 @@ const ChatRoom = ({ room }) => {
                   marginLeft: "15px",
                 }}
               >
-                {message.text}
+                text
               </p>
             </div>
           ))}

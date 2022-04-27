@@ -21,39 +21,38 @@ import { database } from "./firebase";
 import ChatRoom from "./components/ChatRoom";
 
 const me = {
-  id: "", // 약국 id
+  id: "DmAxwnayMTMjTWH5sVNun5db3ls2", // 약국 id
   email: "skdisk7368@naver.com",
 };
 
 const App = () => {
-  const [room, setRoom] = useState([]);
+  const [room, setRoom] = useState({});
   const [users, setUsers] = useState([]);
   const [chatRooms, setChatRooms] = useState([]);
 
   const getUserData = async () => {
     const result = [];
-
     const snapshot = await getDocs(collection(database, "User"));
-    snapshot.forEach((doc) => {
-      // console.log(doc.id, " => ", doc.data());
-      result.push(doc.data());
-    });
 
-    setUsers(result.filter((user) => user.id !== me.id));
+    if (!snapshot.empty) {
+      snapshot.forEach((doc) => {
+        // console.log(doc.id, " => ", doc.data());
+        result.push(doc.data());
+      });
+
+      setUsers(result.filter((user) => user.id !== me.id));
+    }
   };
 
   const handleSendToPharmacy = async () => {
     const roomId = "AZe4IiNCOkeazzDZiMdv";
-    let messageId = null;
-
     const response = await addDoc(collection(database, `Chat/${roomId}/messages`), {
       to: me.id,
-      from: "", // 앱 유저 id
+      from: "lIKS4CULl1M5S3f1Fi7WRi1FDoG2", // 앱 유저 id
       createdAt: serverTimestamp(),
       text: "소비자로부터 왔습니다",
     });
-
-    messageId = response.id;
+    let messageId = response.id;
 
     Promise.all([
       updateDoc(doc(database, `Chat/${roomId}/messages`, messageId), {
@@ -76,11 +75,8 @@ const App = () => {
       where("customerId", "==", selectedUser.id)
     );
     const snapshot = await getDocs(q);
-    const { empty: isEmpty } = snapshot;
 
-    if (!isEmpty) {
-      setRoom({ ...snapshot.docs[0].data() });
-    } else {
+    if (snapshot.empty) {
       // 채팅방 생성
       let chatId = null;
 
@@ -94,7 +90,7 @@ const App = () => {
 
         chatId = newRoomData.id;
 
-        await updateDoc(doc(database, `Chat/${chatId}`), {
+        updateDoc(doc(database, `Chat/${chatId}`), {
           id: chatId,
         });
 
@@ -105,6 +101,8 @@ const App = () => {
         console.error(err);
         await deleteDoc(doc(database, `Chat/${chatId}`));
       }
+    } else {
+      setRoom({ ...snapshot.docs[0].data() });
     }
   };
 
@@ -120,7 +118,6 @@ const App = () => {
       const arr = doc.docs.map((d) => d.data());
 
       doc.docChanges().forEach((change) => {
-        console.log(change.type);
         if (change.type === "added") {
           console.log("New Message: ", change.doc.data());
         }
@@ -138,7 +135,7 @@ const App = () => {
 
   return (
     <div>
-      <button onClick={handleSendToPharmacy}>채팅 전송</button>
+      <button onClick={handleSendToPharmacy}>To 약국</button>
       <div className="userlist">
         <h1>유저 목록</h1>
         {users.map((user) => (
