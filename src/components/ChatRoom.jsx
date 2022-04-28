@@ -40,20 +40,20 @@ const ChatRoom = ({ room }) => {
 
     try {
       // chat 에 message 추가
-      const response = await addDoc(collection(database, `Chat/${roomId}/messages`), {
-        to: customerId,
-        from: pharmacyId,
+      const response = await addDoc(collection(database, `Chat/${roomId}/Messages`), {
+        toId: customerId,
+        fromId: pharmacyId,
         createdAt: serverTimestamp(),
         text: message,
       });
 
       messageId = response.id;
 
-      const lastMessage = await getDoc(doc(database, `Chat/${roomId}/massages/${messageId}`));
+      const lastMessage = await getDoc(doc(database, `Chat/${roomId}/Messages/${messageId}`));
       const batch = writeBatch(database);
 
       Promise.all([
-        updateDoc(doc(database, `Chat/${roomId}/messages`, messageId), {
+        updateDoc(doc(database, `Chat/${roomId}/Messages`, messageId), {
           id: messageId,
         }),
         batch.update(doc(database, `Chat/${roomId}`), {
@@ -68,18 +68,20 @@ const ChatRoom = ({ room }) => {
         })
         .catch(async (err) => {
           console.error(err);
-          await deleteDoc(doc(database, `Chat/${roomId}/messages/${messageId}`));
+          await deleteDoc(doc(database, `Chat/${roomId}/Messages/${messageId}`));
         });
     } catch (err) {
       console.error(err);
-      await deleteDoc(doc(database, `Chat/${roomId}/messages/${messageId}`));
+      await deleteDoc(doc(database, `Chat/${roomId}/Messages/${messageId}`));
     }
   };
 
   useEffect(() => {
-    const q = query(collection(database, `Chat/${room.id}/messages`), orderBy("createdAt", "asc"));
+    const q = query(collection(database, `Chat/${room.id}/Messages`), orderBy("createdAt", "asc"));
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const arr = snapshot.docs.map((d) => d.data());
+      const arr = snapshot.docs.map((d) => ({ ...d.data(), id: d.id }));
+
+      console.log(arr);
 
       updateDoc(doc(database, `Chat/${room.id}`), {
         pharmacyUnreadCount: 0,
@@ -102,25 +104,34 @@ const ChatRoom = ({ room }) => {
   }, [room]);
 
   const [isLoaded, setIsLoaded] = useState(false);
-  const [items, setItems] = useState(Array.from({ length: 10 }));
+  const [items, setItems] = useState([
+    99,
+    99,
+    "qwrwegyrhkertohbopertgl,wegebmermbropegre ertj weriotjk pworqwerwewrwerkweoprkweop owerqwerowekorpkwe ",
+    "qweqwewqewqeqweqweqwewqewqeqweqweqwewqewqeqweqweqwewqewqeqweqweqwewqewqeqwe",
+    "qweqwewqewqeqweqweqwewqewqeqweqweqwewqewqeqweqweqwewqewqeqweqweqwewqewqeqwe",
+    "qweqwewqewqeqweqweqwewqewqeqweqweqwewqewqeqweqweqwewqewqeqweqweqwewqewqeqwe",
+    "qweqwewqewqeqweqweqwewqewqeqweqweqwewqewqeqweqweqwewqewqeqweqweqwewqewqeqwe",
+  ]);
   const [target, setTarget] = useState(null);
+  const [file, setFile] = useState(null);
   const prevScrollHeight = useRef(0);
 
   const getMoreItem = async () => {
     setIsLoaded(true);
     await new Promise((resolve) => setTimeout(resolve, 500));
-    const arr = [11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-    setItems((items) => [...arr, ...items]);
+    const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
+    // setItems((items) => [...arr, ...items]);
     setIsLoaded(false);
   };
 
   const onIntersect = async ([entry], observer) => {
     console.log(entry.isIntersecting, observer);
-    if (entry.isIntersecting && !isLoaded) {
+    console.log(boxRef.current.scrollHeight, prevScrollHeight.current, boxRef.current.offsetHeight);
+    if (entry.isIntersecting && !isLoaded && boxRef.current.scrollHeight > boxRef.current.offsetHeight) {
       console.log("감지!");
       observer.unobserve(entry.target);
       await getMoreItem();
-      // boxRef.current.scrollTop = boxRef.current.scrollHeight - prevScrollHeight;
       observer.observe(entry.target);
     }
   };
@@ -129,9 +140,9 @@ const ChatRoom = ({ room }) => {
     if (target) {
       console.log("we");
       const observer = new IntersectionObserver(onIntersect, {
-        threshold: 0.3,
+        threshold: 1,
         root: boxRef.current,
-        rootMargin: `${boxRef.current.scrollHeight / 2}px 0px 0px 0px`,
+        rootMargin: `0px 0px 0px 0px`,
       });
 
       observer.observe(target);
@@ -144,17 +155,22 @@ const ChatRoom = ({ room }) => {
     console.log(items);
   }, [items]);
 
+  const handleUploadFile = (e) => {
+    const [file] = e.target.files;
+    console.log(file);
+  };
+
   return (
     <>
       <h1>채팅방</h1>
       <div className="chat-box" ref={boxRef}>
-        <p style={{ position: "sticky", top: "0", backgroundColor: "orange", margin: "0", height: "50px" }}>
+        {/* <p style={{ position: "sticky", top: "0", backgroundColor: "orange", margin: "0", height: "50px" }}>
           To: <b>{room.customerId}</b>
-        </p>
+        </p> */}
         <div style={{}} ref={setTarget}></div>
         <div>
-          {/* {messages.map((message) => (
-            <div style={{ textAlign: message.from === room.pharmacyId ? "right" : "left" }}>
+          {messages.map((message) => (
+            <div style={{ textAlign: message.fromId === room.pharmacyId ? "right" : "left" }}>
               <p
                 key={message.id}
                 style={{
@@ -170,30 +186,46 @@ const ChatRoom = ({ room }) => {
                 {message.text}
               </p>
             </div>
-          ))} */}
-          {items.map((item, index) => (
+          ))}
+          {/* {items.map((item, index) => (
             <div>
-              <p
+              <pre
                 key={index}
                 style={{
                   padding: "10px",
                   backgroundColor: "white",
                   width: "100px",
-                  height: "70px",
+                  // height: "70px",
                   display: "inline-block",
                   marginRight: "15px",
                   marginLeft: "15px",
+                  whiteSpace: "break-spaces",
+                  wordBreak: "break-all",
                 }}
               >
-                text
-              </p>
+                {item}
+              </pre>
             </div>
-          ))}
+          ))} */}
         </div>
       </div>
       <div className="textbox">
         <textarea cols="30" rows="10" value={message} onChange={handleMessage}></textarea>
         <button onClick={handleSendMessage}>전송</button>
+        <label
+          htmlFor="input-file"
+          style={{
+            padding: "5px 25px",
+            color: "white",
+            backgroundColor: "blue",
+            display: "inline",
+            borderRadius: "4px",
+            cursor: "pointer",
+          }}
+        >
+          첨부파일
+        </label>
+        <input type="file" id="input-file" style={{ display: "none" }} onChange={handleUploadFile} />
       </div>
     </>
   );

@@ -21,7 +21,7 @@ import { database } from "./firebase";
 import ChatRoom from "./components/ChatRoom";
 
 const me = {
-  id: "DmAxwnayMTMjTWH5sVNun5db3ls2", // 약국 id
+  id: "4R95r5NS0YbWaw12z3E4Zyuw5aI3", // 약국 id
   email: "skdisk7368@naver.com",
 };
 
@@ -107,6 +107,7 @@ const App = () => {
   };
 
   const handleChatRoomClick = (selectedRoom) => async () => {
+    console.log(selectedRoom);
     setRoom({ ...room, ...selectedRoom });
   };
 
