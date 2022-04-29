@@ -15,10 +15,11 @@ import {
   where,
   writeBatch,
 } from "firebase/firestore";
-import { database } from "../firebase";
+import { database, storage } from "../firebase";
 import { useEffect } from "react";
 import { useRef } from "react";
 import { useCallback } from "react";
+import { ref, uploadBytes, uploadBytesResumable } from "firebase/storage";
 
 const ChatRoom = ({ room }) => {
   const [message, setMessage] = useState("");
@@ -138,7 +139,6 @@ const ChatRoom = ({ room }) => {
 
   useEffect(() => {
     if (target) {
-      console.log("we");
       const observer = new IntersectionObserver(onIntersect, {
         threshold: 1,
         root: boxRef.current,
@@ -155,14 +155,35 @@ const ChatRoom = ({ room }) => {
     console.log(items);
   }, [items]);
 
-  const handleUploadFile = (e) => {
+  const handleUploadFile = async (e) => {
     const [file] = e.target.files;
-    console.log(file);
+
+    if (file) {
+      console.log(file);
+      console.log(new FileReader());
+
+      const uploadTask = uploadBytesResumable(ref(storage, `Chat/${file.name}`), file);
+
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          console.log(snapshot);
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          console.log(`Upload is ${Math.floor(progress)}% done`);
+        },
+        (error) => {
+          console.error(error);
+        },
+        () => {
+          console.log("전송 완료");
+        }
+      );
+    }
   };
 
   return (
     <>
-      <h1>채팅방</h1>
+      <h1>채팅방 ({room.customerId})</h1>
       <div className="chat-box" ref={boxRef}>
         {/* <p style={{ position: "sticky", top: "0", backgroundColor: "orange", margin: "0", height: "50px" }}>
           To: <b>{room.customerId}</b>
@@ -174,16 +195,24 @@ const ChatRoom = ({ room }) => {
               <p
                 key={message.id}
                 style={{
-                  padding: "10px",
+                  // padding: "10px",
                   backgroundColor: "white",
-                  width: "100px",
-                  height: "70px",
+                  width: "250px",
+                  height: "250px",
                   display: "inline-block",
                   marginRight: "15px",
                   marginLeft: "15px",
                 }}
               >
-                {message.text}
+                <img
+                  src={message.imageURL}
+                  alt=""
+                  style={{ width: "100%", height: "100%", cursor: "zoom-in" }}
+                  onClick={() => {
+                    window.open(message.imageURL, "__blank");
+                  }}
+                />
+                {/* {message.text} */}
               </p>
             </div>
           ))}

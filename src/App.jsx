@@ -21,7 +21,8 @@ import { database } from "./firebase";
 import ChatRoom from "./components/ChatRoom";
 
 const me = {
-  id: "4R95r5NS0YbWaw12z3E4Zyuw5aI3", // 약국 id
+  id: "DmAxwnayMTMjTWH5sVNun5db3ls2",
+  // id: "4R95r5NS0YbWaw12z3E4Zyuw5aI3", // 약국 id
   email: "skdisk7368@naver.com",
 };
 
@@ -46,16 +47,16 @@ const App = () => {
 
   const handleSendToPharmacy = async () => {
     const roomId = "AZe4IiNCOkeazzDZiMdv";
-    const response = await addDoc(collection(database, `Chat/${roomId}/messages`), {
-      to: me.id,
-      from: "lIKS4CULl1M5S3f1Fi7WRi1FDoG2", // 앱 유저 id
+    const response = await addDoc(collection(database, `Chat/${roomId}/Messages`), {
+      toId: me.id,
+      fromId: "lIKS4CULl1M5S3f1Fi7WRi1FDoG2", // 앱 유저 id
       createdAt: serverTimestamp(),
       text: "소비자로부터 왔습니다",
     });
     let messageId = response.id;
 
     Promise.all([
-      updateDoc(doc(database, `Chat/${roomId}/messages`, messageId), {
+      updateDoc(doc(database, `Chat/${roomId}/Messages`, messageId), {
         id: messageId,
       }),
       updateDoc(doc(database, `Chat/${roomId}`), { pharmacyUnreadCount: increment(1) }),
@@ -149,7 +150,7 @@ const App = () => {
         <h1>채팅방 목록</h1>
         {chatRooms.map((room, index) => (
           <div key={index} onClick={handleChatRoomClick(room)}>
-            {room.customerId} {room.pharmacyUnreadCount}
+            {room.id} {room.pharmacyUnreadCount}
           </div>
         ))}
       </div>
