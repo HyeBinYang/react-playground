@@ -1,36 +1,3 @@
-label {
-  display: block;
+h1 {
+  color: red;
 }
-
-.chat-box {
-  width: 100%;
-  height: 500px;
-  background-color: rgb(177, 216, 231);
-  margin-bottom: 20px;
-  overflow-y: scroll;
-}
-
-/* export interface Chat {
-  id?: string;
-  pharmacyId?: string;
-  pharmacy?: Pharmacy;
-  customerId?: string;
-  customer?: any;
-  lastMessage?: Message;
-  lastMessageAt?: Timestamp;
-  pharmacyUnreadCount?: number;
-  customerUnreadCount?: number;
-  messages?: Message[];
-}
-
-export interface Message {
-  id: string;
-  toId: string;
-  fromId: string;
-  type: string;
-  createdAt: Timestamp;
-  // readAt?: Timestamp;
-  text?: string;
-  imageURL?: string;
-  fileURL?: string;
-} */
