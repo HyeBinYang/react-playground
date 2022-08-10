@@ -1,10 +1,20 @@
 import React from "react";
-import "./App.css";
+import { Button } from "@oj-onjourney/ymyd-atomic";
 
 const App = () => {
   return (
     <div>
-      <h1>Hello World!!</h1>
+      <Button
+        size={"Medium"}
+        type={"IconWithText"}
+        variant={"Contained"}
+        color={"Primary"}
+        left
+        icon={"Plus"}
+        onClick={() => {}}
+      >
+        Text
+      </Button>
     </div>
   );
 };
