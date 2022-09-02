@@ -1,0 +1,12 @@
+name: on release
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  amplify-webhook:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: curl -X POST -d {} "위에서생성한웹훅경로" -H "Content-Type:application/json"
