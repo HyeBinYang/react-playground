@@ -2,7 +2,7 @@ name: on release
 
 on:
   schedule:
-    - cron: "0 12 2 9 *"
+    - cron: "0 4 2 9 *"
 
 jobs:
   amplify-webhook:
