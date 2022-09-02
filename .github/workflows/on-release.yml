@@ -1,12 +1,12 @@
 name: on release
 
 on:
-  release:
-    types: [created]
+  schedule:
+    - cron: "0 12 2 9 *"
 
 jobs:
   amplify-webhook:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: curl -X POST -d {} "위에서생성한웹훅경로" -H "Content-Type:application/json"
+      - run: curl -X POST -d {} "https://webhooks.amplify.us-east-1.amazonaws.com/prod/webhooks?id=c087481a-a82f-43b8-bd46-a5b412201165&token=RPGBJ2lsemw3qeTQwQzlbfPthJ4Tllkrw8y7P5cjqY&amp;operation=startbuild" -H "Content-Type:application/json"
