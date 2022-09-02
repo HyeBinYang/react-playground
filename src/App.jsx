@@ -13,7 +13,7 @@ const App = () => {
         icon={"Plus"}
         onClick={() => {}}
       >
-        Text
+        Text123
       </Button>
     </div>
   );
